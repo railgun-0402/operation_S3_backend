@@ -1,37 +1,48 @@
 import mysql.connector
 import os
+import logging
+import traceback
 
+log = logging.getLogger()
+log.setLevel(logging.INFO)
 
-def sample():
-    return 'Hello DB page!'
+config = {
+    'host': 'localhost',
+    'user': os.environ['MYSQL_ID'],
+    'passwd': os.environ['MYSQL_PW'],
+    'db': os.environ['MYSQL_DB_QUIZ']
+}
 
 
 # DB接続情報
 def conn_db():
-    conn = mysql.connector.connect(
-        host='localhost',
-        user=os.environ['MYSQL_ID'],
-        passwd=os.environ['MYSQL_PW'],
-        db=os.environ['MYSQL_DB_QUIZ']
-    )
+    conn = mysql.connector.connect(**config)
     return conn
 
 
-# DBに接続し、適当なデータを取りに行く
-def try_conn():
-    sql = 'SELECT * FROM users'
+# 受け取ったSQLを実行する
+def try_conn(conn, sql, params=None):
+    res = []
+    cursor = conn.cursor(prepared=True)
     try:
-        conn = conn_db()
-        cursor = conn.cursor()
-        cursor.execute(sql)
+        # SQLにパラメータを渡す場合
+        if params:
+            log.info(f"sql: {sql}, params: {params}")
+            cursor.execute(sql, params)
+        else:
+            log.info(f"sql: {sql}")
+            cursor.execute(sql)
+
         rows = cursor.fetchall()
 
+        for row in rows:
+            res.append(row)
+        return res
+
     except Exception as e:
-        print('ERRORですね')
-        print(e)
+        log.error(traceback.format_exc())
+        log.error(f"sql: {sql}")
+        raise e
 
-    for t_rows in rows:
-        print('result:')
-        print(t_rows)
-
-    return rows
+    finally:
+        cursor.close()
