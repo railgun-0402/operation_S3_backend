@@ -31,5 +31,10 @@ def get_user_info():
     return format(db.try_conn(conn, sql))
 
 
+@app.route('/s3')
+def download_from_s3():
+    return 'welcom s3 page!'
+
+
 if __name__ == '__main__':
     app.run()
