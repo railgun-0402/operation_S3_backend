@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from func import db
+from func.aws import s3
 
 app = Flask(__name__)
 CORS(app)
@@ -31,9 +32,10 @@ def get_user_info():
     return format(db.try_conn(conn, sql))
 
 
+# S3ダウンロード用
 @app.route('/s3')
 def download_from_s3():
-    return 'welcom s3 page!'
+    return s3.sample_func()
 
 
 if __name__ == '__main__':
